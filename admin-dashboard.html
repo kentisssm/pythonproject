@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1a0000, #000000);
+      color: white;
+    }
+
+    .layout {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #0b0b0b;
+      padding: 24px 18px;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .brand {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 28px;
+    }
+
+    .nav button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 12px 14px;
+      border: none;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      cursor: pointer;
+      text-align: left;
+      font-size: 14px;
+      transition: 0.25s ease;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: rgba(139,0,0,0.35);
+    }
+
+    .main {
+      flex: 1;
+      padding: 28px;
+    }
+
+    .topbar h1 {
+      margin: 0 0 8px;
+    }
+
+    .topbar p {
+      margin: 0 0 24px;
+      color: #d1d5db;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: #111111;
+      border: 1px solid rgba(139,0,0,0.35);
+      border-radius: 16px;
+      padding: 18px;
+    }
+
+    .stat-card .label {
+      color: #cbd5e1;
+      font-size: 14px;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-size: 30px;
+      font-weight: 700;
+    }
+
+    .panel {
+      background: #111111;
+      border: 1px solid rgba(139,0,0,0.35);
+      border-radius: 18px;
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+
+    .panel h2 {
+      margin-top: 0;
+      margin-bottom: 14px;
+    }
+
+    .two-col {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .field {
+      margin-bottom: 14px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.95);
+      color: #111827;
+      font-size: 14px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .btn {
+      border: none;
+      background: #8b0000;
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-right: 8px;
+      margin-top: 8px;
+      transition: 0.25s ease;
+    }
+
+    .btn:hover {
+      background: #a30000;
+    }
+
+    .btn.secondary {
+      background: #334155;
+    }
+
+    .stage-box,
+    .activity-card {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .meta {
+      color: #cbd5e1;
+      font-size: 13px;
+      margin-top: 6px;
+      line-height: 1.5;
+    }
+
+    .activity-list,
+    .client-list {
+      max-height: 75vh;
+      overflow: auto;
+      padding-right: 4px;
+    }
+
+    .empty {
+      color: #cbd5e1;
+      padding: 12px 0;
+    }
+
+    .client-accordion {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      margin-bottom: 14px;
+      overflow: hidden;
+    }
+
+    .client-accordion-header {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: white;
+      text-align: left;
+      padding: 18px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      transition: 0.25s ease;
+    }
+
+    .client-accordion-header:hover {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .client-name {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .client-summary-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 260px;
+      justify-content: flex-end;
+    }
+
+    .client-progress-mini {
+      width: 140px;
+    }
+
+    .client-progress-mini-bar {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .client-progress-mini-fill {
+      height: 100%;
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    .client-progress-mini-fill.not-started {
+      background: linear-gradient(90deg, #7f1d1d, #ef4444);
+    }
+
+    .client-progress-mini-fill.in-progress {
+      background: linear-gradient(90deg, #f59e0b, #fde047);
+    }
+
+    .client-progress-mini-fill.completed {
+      background: linear-gradient(90deg, #16a34a, #86efac);
+    }
+
+    .client-percent {
+      font-size: 18px;
+      font-weight: 700;
+      min-width: 60px;
+      text-align: right;
+    }
+
+    .client-percent.not-started {
+      color: #fca5a5;
+    }
+
+    .client-percent.in-progress {
+      color: #fde68a;
+    }
+
+    .client-percent.completed {
+      color: #86efac;
+    }
+
+    .client-arrow {
+      font-size: 20px;
+      color: #fca5a5;
+      transition: transform 0.3s ease;
+    }
+
+    .client-accordion.open .client-arrow {
+      transform: rotate(180deg);
+    }
+
+    .client-accordion-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.35s ease;
+      border-top: 1px solid rgba(255,255,255,0);
+    }
+
+    .client-accordion.open .client-accordion-content {
+      grid-template-rows: 1fr;
+      border-top-color: rgba(255,255,255,0.08);
+    }
+
+    .client-accordion-inner {
+      overflow: hidden;
+    }
+
+    .client-accordion-body {
+      padding: 0 18px 18px;
+    }
+
+    .client-activity {
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    .client-activity h4 {
+      margin: 0 0 8px;
+    }
+
+    .progress-wrap {
+      margin-top: 10px;
+      margin-bottom: 10px;
+    }
+
+    .progress-text {
+      font-size: 13px;
+      color: #e5e7eb;
+      margin-bottom: 6px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 12px;
+      background: rgba(255,255,255,0.10);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7f1d1d, #dc2626);
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    .stage-submission {
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.05);
+    }
+
+    @media (max-width: 1100px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; }
+      .two-col { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="brand">Admin Panel</div>
+      <div class="nav">
+        <button type="button" class="active" onclick="scrollToTopPage()">Manage Activities</button>
+        <button type="button" onclick="scrollToSection('monitorSection')">Client Progress</button>
+        <button type="button" onclick="window.location.href='dashboard.html'">View Client Dashboard</button>
+        <button type="button" onclick="logout()">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div class="topbar">
+        <h1>Activity Workflow Manager</h1>
+        <p>Welcome, <span id="adminName"></span>. Create activities with stages and deadline dates, then monitor all client progress.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="label">Total Clients</div>
+          <div class="value" id="totalClients">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Activities</div>
+          <div class="value" id="totalActivities">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Total Submissions</div>
+          <div class="value" id="totalSubmissions">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Completion Rate</div>
+          <div class="value" id="overallCompletion">0%</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <section class="panel">
+          <h2>Create Activity</h2>
+
+          <div class="field">
+            <label for="activityTitle">Activity Title</label>
+            <input id="activityTitle" type="text" placeholder="Enter activity title" />
+          </div>
+
+          <div class="field">
+            <label for="activityDescription">Activity Description</label>
+            <textarea id="activityDescription" placeholder="Enter activity description"></textarea>
+          </div>
+
+          <div class="field">
+            <label for="activityDeadline">Activity Deadline</label>
+            <input id="activityDeadline" type="date" />
+          </div>
+
+          <div class="field">
+            <label for="stageCount">Number of Stages</label>
+            <input id="stageCount" type="number" min="1" max="20" value="5" />
+          </div>
+
+          <button class="btn secondary" type="button" onclick="generateStages()">Generate Stages</button>
+
+          <div id="stagesContainer" style="margin-top:16px;"></div>
+
+          <button class="btn" type="button" onclick="saveActivity()">Publish Activity</button>
+        </section>
+
+        <section class="panel">
+          <h2>Published Activities</h2>
+          <div id="activityList" class="activity-list"></div>
+        </section>
+      </div>
+
+      <section class="panel" id="monitorSection">
+        <h2>Client Accounts and Progress</h2>
+
+        <div class="field">
+          <label for="clientFilter">Filter Client</label>
+          <select id="clientFilter" onchange="renderClientProgress()">
+            <option value="all">All Clients</option>
+          </select>
+        </div>
+
+        <div id="clientProgressList" class="client-list"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const SESSION_KEY = 'local_auth_session';
+    const USERS_KEY = 'local_auth_users';
+    const ACTIVITIES_KEY = 'site_activities';
+    const SUBMISSIONS_KEY = 'client_stage_submissions';
+
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+
+    if (!session || !session.username || session.username.toLowerCase() !== 'admin') {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('adminName').textContent = session.username;
+
+    function getUsers() {
+      return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    }
+
+    function getClientUsers() {
+      return getUsers().filter(user => user.username.toLowerCase() !== 'admin');
+    }
+
+    function getActivities() {
+      return JSON.parse(localStorage.getItem(ACTIVITIES_KEY) || '[]');
+    }
+
+    function saveActivities(data) {
+      localStorage.setItem(ACTIVITIES_KEY, JSON.stringify(data));
+    }
+
+    function getSubmissions() {
+      return JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '{}');
+    }
+
+    function scrollToSection(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+
+    function scrollToTopPage() {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function generateStages() {
+      const count = parseInt(document.getElementById('stageCount').value, 10) || 1;
+      const container = document.getElementById('stagesContainer');
+      container.innerHTML = '';
+
+      for (let i = 1; i <= count; i++) {
+        const box = document.createElement('div');
+        box.className = 'stage-box';
+        box.innerHTML = `
+          <div class="field">
+            <label>Stage ${i} Title</label>
+            <input type="text" class="stage-title" placeholder="Enter stage ${i} title" />
+          </div>
+          <div class="field">
+            <label>Stage ${i} Instruction</label>
+            <textarea class="stage-instruction" placeholder="Enter instruction for stage ${i}"></textarea>
+          </div>
+        `;
+        container.appendChild(box);
+      }
+    }
+
+    function saveActivity() {
+      const title = document.getElementById('activityTitle').value.trim();
+      const description = document.getElementById('activityDescription').value.trim();
+      const deadline = document.getElementById('activityDeadline').value;
+      const stageTitles = document.querySelectorAll('.stage-title');
+      const stageInstructions = document.querySelectorAll('.stage-instruction');
+
+      if (!title || !description || !deadline) {
+        alert('Please complete the activity title, description, and deadline.');
+        return;
+      }
+
+      const stages = [];
+      for (let i = 0; i < stageTitles.length; i++) {
+        const stageTitle = stageTitles[i].value.trim();
+        const instruction = stageInstructions[i].value.trim();
+
+        if (!stageTitle || !instruction) {
+          alert(`Please complete all fields for Stage ${i + 1}.`);
+          return;
+        }
+
+        stages.push({
+          id: 'stage_' + (i + 1),
+          title: stageTitle,
+          instruction: instruction
+        });
+      }
+
+      const activities = getActivities();
+      activities.push({
+        id: 'act_' + Date.now(),
+        title,
+        description,
+        deadline,
+        createdAt: new Date().toLocaleString(),
+        stages
+      });
+
+      saveActivities(activities);
+
+      document.getElementById('activityTitle').value = '';
+      document.getElementById('activityDescription').value = '';
+      document.getElementById('activityDeadline').value = '';
+      document.getElementById('stageCount').value = 5;
+      document.getElementById('stagesContainer').innerHTML = '';
+
+      refreshAdminView();
+      alert('Activity published successfully.');
+    }
+
+    function deleteActivity(id) {
+      const updated = getActivities().filter(activity => activity.id !== id);
+      saveActivities(updated);
+      refreshAdminView();
+    }
+
+    function renderActivities() {
+      const list = document.getElementById('activityList');
+      const activities = getActivities();
+
+      if (!activities.length) {
+        list.innerHTML = '<div class="activity-card">No activities yet.</div>';
+        return;
+      }
+
+      list.innerHTML = activities.map(activity => `
+        <div class="activity-card">
+          <h3>${activity.title}</h3>
+          <p>${activity.description}</p>
+          <div class="meta">Stages: ${activity.stages.length}</div>
+          <div class="meta">Deadline: ${activity.deadline}</div>
+          <div class="meta">Created: ${activity.createdAt}</div>
+          <button class="btn secondary" onclick="deleteActivity('${activity.id}')">Delete</button>
+        </div>
+      `).join('');
+    }
+
+    function populateClientFilter() {
+      const select = document.getElementById('clientFilter');
+      const clients = getClientUsers();
+      const currentValue = select.value || 'all';
+
+      select.innerHTML =
+        '<option value="all">All Clients</option>' +
+        clients.map(client => `<option value="${client.username}">${client.username}</option>`).join('');
+
+      const values = ['all', ...clients.map(c => c.username)];
+      select.value = values.includes(currentValue) ? currentValue : 'all';
+    }
+
+    function renderDashboardStats() {
+      const clients = getClientUsers();
+      const activities = getActivities();
+      const submissions = getSubmissions();
+
+      let totalCompletedStages = 0;
+      let totalPossibleStages = 0;
+      let totalSubmissionEntries = 0;
+
+      clients.forEach(client => {
+        activities.forEach(activity => {
+          const key = client.username + '__' + activity.id;
+          const clientActivitySubmissions = submissions[key] || {};
+          const completedCount = Object.keys(clientActivitySubmissions).length;
+
+          totalSubmissionEntries += completedCount;
+          totalCompletedStages += completedCount;
+          totalPossibleStages += activity.stages.length;
+        });
+      });
+
+      const completionRate = totalPossibleStages > 0
+        ? Math.round((totalCompletedStages / totalPossibleStages) * 100)
+        : 0;
+
+      document.getElementById('totalClients').textContent = clients.length;
+      document.getElementById('totalActivities').textContent = activities.length;
+      document.getElementById('totalSubmissions').textContent = totalSubmissionEntries;
+      document.getElementById('overallCompletion').textContent = completionRate + '%';
+    }
+
+    function toggleClientAccordion(username) {
+      const el = document.getElementById('client_accordion_' + username);
+      if (el) {
+        el.classList.toggle('open');
+      }
+    }
+
+    function getProgressState(progress) {
+      if (progress <= 0) {
+        return 'not-started';
+      }
+      if (progress >= 100) {
+        return 'completed';
+      }
+      return 'in-progress';
+    }
+
+    function renderClientProgress() {
+      const container = document.getElementById('clientProgressList');
+      const clients = getClientUsers();
+      const activities = getActivities();
+      const submissions = getSubmissions();
+      const filterValue = document.getElementById('clientFilter').value;
+
+      const filteredClients = filterValue === 'all'
+        ? clients
+        : clients.filter(client => client.username === filterValue);
+
+      if (!filteredClients.length) {
+        container.innerHTML = '<div class="empty">No client accounts found.</div>';
+        return;
+      }
+
+      container.innerHTML = filteredClients.map((client, index) => {
+        let totalCompletedStages = 0;
+        let totalPossibleStages = 0;
+
+        const activitiesHtml = activities.length
+          ? activities.map(activity => {
+              const key = client.username + '__' + activity.id;
+              const clientSubs = submissions[key] || {};
+              const completedCount = activity.stages.filter(
+                stage => clientSubs[stage.id]?.completed || clientSubs[stage.id]
+              ).length;
+              const totalStages = activity.stages.length;
+              const progress = totalStages > 0
+                ? Math.round((completedCount / totalStages) * 100)
+                : 0;
+
+              totalCompletedStages += completedCount;
+              totalPossibleStages += totalStages;
+
+              return `
+                <div class="client-activity">
+                  <h4>${activity.title}</h4>
+                  <div class="meta">Deadline: ${activity.deadline || 'No deadline'}</div>
+
+                  <div class="progress-wrap">
+                    <div class="progress-text">
+                      <span>${completedCount}/${totalStages} stages completed</span>
+                      <span>${progress}%</span>
+                    </div>
+                    <div class="progress-bar">
+                      <div class="progress-fill" style="width:${progress}%"></div>
+                    </div>
+                  </div>
+
+                  ${activity.stages.map(stage => {
+                    const sub = clientSubs[stage.id];
+                    return `
+                      <div class="stage-submission">
+                        <strong>${stage.title}</strong>
+                        <div class="meta">Instruction: ${stage.instruction}</div>
+                        ${sub
+                          ? `
+                            <div class="meta">Status: Completed</div>
+                            <div class="meta">File: ${sub.fileName || 'No file selected'}</div>
+                            <div class="meta">Remarks: ${sub.note || 'No remarks'}</div>
+                            <div class="meta">Uploaded: ${sub.uploadedAt || '-'}</div>
+                          `
+                          : `
+                            <div class="meta">Status: Not submitted yet</div>
+                          `
+                        }
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              `;
+            }).join('')
+          : '<div class="empty">No activities created yet.</div>';
+
+        const overallProgress = totalPossibleStages > 0
+          ? Math.round((totalCompletedStages / totalPossibleStages) * 100)
+          : 0;
+
+        const progressState = getProgressState(overallProgress);
+
+        return `
+          <div class="client-accordion ${index === 0 ? 'open' : ''}" id="client_accordion_${client.username}">
+            <button class="client-accordion-header" type="button" onclick="toggleClientAccordion('${client.username}')">
+              <div class="client-name">${client.username}</div>
+              <div class="client-summary-right">
+                <div class="client-progress-mini">
+                  <div class="client-progress-mini-bar">
+                    <div class="client-progress-mini-fill ${progressState}" style="width:${overallProgress}%"></div>
+                  </div>
+                </div>
+                <div class="client-percent ${progressState}">${overallProgress}%</div>
+                <div class="client-arrow">⌄</div>
+              </div>
+            </button>
+
+            <div class="client-accordion-content">
+              <div class="client-accordion-inner">
+                <div class="client-accordion-body">
+                  ${activitiesHtml}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function refreshAdminView() {
+      renderActivities();
+      populateClientFilter();
+      renderDashboardStats();
+      renderClientProgress();
+    }
+
+    function logout() {
+      localStorage.removeItem(SESSION_KEY);
+      window.location.replace('index.html');
+    }
+
+    generateStages();
+    refreshAdminView();
+
+    window.addEventListener('storage', () => {
+      refreshAdminView();
+    });
+  </script>
+</body>
+</html>

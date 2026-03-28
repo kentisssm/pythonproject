@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Client Dashboard</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #1a0000, #000000);
+      color: white;
+    }
+
+    .header {
+      padding: 24px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .header h1 {
+      margin: 0 0 6px;
+    }
+
+    .header p {
+      margin: 0;
+      color: #e2e8f0;
+    }
+
+    .btn {
+      border: none;
+      background: #991b1b;
+      color: white;
+      padding: 12px 16px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.25s ease;
+    }
+
+    .btn:hover {
+      background: #b91c1c;
+      transform: translateY(-1px);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    .empty {
+      background: rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 22px;
+      color: #e2e8f0;
+    }
+
+    .activity-accordion {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      margin-bottom: 18px;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+    }
+
+    .accordion-header {
+      width: 100%;
+      border: none;
+      background: transparent;
+      color: white;
+      text-align: left;
+      padding: 20px;
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      transition: background 0.25s ease;
+    }
+
+    .accordion-header:hover {
+      background: rgba(255,255,255,0.04);
+    }
+
+    .accordion-left h2 {
+      margin: 0 0 8px;
+      font-size: 22px;
+    }
+
+    .accordion-left p {
+      margin: 0 0 10px;
+      color: #e5e7eb;
+      line-height: 1.6;
+    }
+
+    .meta {
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    .accordion-right {
+      min-width: 90px;
+      text-align: right;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    .progress-pill {
+      padding: 6px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      font-size: 12px;
+      font-weight: 700;
+      color: #f8fafc;
+      white-space: nowrap;
+    }
+
+    .accordion-icon {
+      font-size: 24px;
+      color: #fca5a5;
+      transition: transform 0.35s ease;
+      transform-origin: center;
+      line-height: 1;
+    }
+
+    .activity-accordion.open .accordion-icon {
+      transform: rotate(180deg);
+    }
+
+    .accordion-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.4s ease;
+      border-top: 1px solid rgba(255,255,255,0);
+    }
+
+    .activity-accordion.open .accordion-content {
+      grid-template-rows: 1fr;
+      border-top-color: rgba(255,255,255,0.08);
+    }
+
+    .accordion-inner {
+      overflow: hidden;
+    }
+
+    .accordion-inner-content {
+      padding: 0 20px 20px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 16px 0 18px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #7f1d1d, #dc2626);
+      width: 0%;
+      transition: width 0.35s ease;
+    }
+
+    .stage-card {
+      background: rgba(255,255,255,0.06);
+      border-radius: 14px;
+      padding: 16px;
+      margin-top: 14px;
+      border: 1px solid rgba(255,255,255,0.06);
+      transition: all 0.3s ease;
+    }
+
+    .stage-card.completed {
+      border-color: rgba(34,197,94,0.35);
+      background: rgba(34,197,94,0.08);
+    }
+
+    .stage-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .stage-card h4 {
+      margin: 0;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .badge.completed {
+      background: rgba(34,197,94,0.15);
+      color: #86efac;
+    }
+
+    .badge.pending {
+      background: rgba(250,204,21,0.12);
+      color: #fde68a;
+    }
+
+    .instruction {
+      color: #e5e7eb;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+
+    .field-label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #f8fafc;
+    }
+
+    input[type="file"],
+    textarea {
+      width: 100%;
+      margin-top: 0;
+      margin-bottom: 10px;
+    }
+
+    textarea {
+      min-height: 80px;
+      border-radius: 10px;
+      border: none;
+      padding: 12px;
+      resize: vertical;
+      font-family: Arial, sans-serif;
+      outline: none;
+    }
+
+    .status {
+      font-size: 13px;
+      color: #cbd5e1;
+      margin-top: 8px;
+      line-height: 1.6;
+    }
+
+    .stage-dropdown {
+      margin-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding-top: 12px;
+    }
+
+    .stage-dropdown-toggle {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      border: none;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      padding: 0;
+      font: inherit;
+      margin-bottom: 6px;
+    }
+
+    .stage-dropdown-icon {
+      transition: transform 0.3s ease;
+      color: #fca5a5;
+      font-size: 18px;
+    }
+
+    .stage-dropdown.open .stage-dropdown-icon {
+      transform: rotate(180deg);
+    }
+
+    .stage-dropdown-content {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.35s ease;
+    }
+
+    .stage-dropdown.open .stage-dropdown-content {
+      grid-template-rows: 1fr;
+    }
+
+    .stage-dropdown-inner {
+      overflow: hidden;
+    }
+
+    .stage-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .btn.small {
+      padding: 10px 14px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      .accordion-header {
+        flex-direction: column;
+      }
+
+      .accordion-right {
+        text-align: left;
+        justify-content: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div>
+      <h1>Client Dashboard</h1>
+      <p>Welcome, <span id="clientName"></span>. Click an activity to view all stages.</p>
+    </div>
+    <button class="btn" onclick="logout()">Logout</button>
+  </div>
+
+  <div class="container">
+    <div id="activityContainer"></div>
+  </div>
+
+  <script>
+    const SESSION_KEY = 'local_auth_session';
+    const ACTIVITIES_KEY = 'site_activities';
+    const SUBMISSIONS_KEY = 'client_stage_submissions';
+
+    const session = JSON.parse(localStorage.getItem(SESSION_KEY) || 'null');
+    if (!session || !session.username) {
+      window.location.href = 'index.html';
+    }
+
+    document.getElementById('clientName').textContent = session.username;
+
+    function getActivities() {
+      return JSON.parse(localStorage.getItem(ACTIVITIES_KEY) || '[]');
+    }
+
+    function getSubmissions() {
+      return JSON.parse(localStorage.getItem(SUBMISSIONS_KEY) || '{}');
+    }
+
+    function saveSubmissions(data) {
+      localStorage.setItem(SUBMISSIONS_KEY, JSON.stringify(data));
+    }
+
+    function getUserActivityKey(activityId) {
+      return session.username + '__' + activityId;
+    }
+
+    function getDeadlineStatus(deadline) {
+      const today = new Date();
+      const due = new Date(deadline + 'T23:59:59');
+      const diffMs = due - today;
+      const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+      if (diffDays < 0) {
+        return { text: 'Overdue', color: '#fca5a5' };
+      }
+      if (diffDays === 0) {
+        return { text: 'Due today', color: '#fde68a' };
+      }
+      return { text: diffDays + ' day(s) remaining', color: '#86efac' };
+    }
+
+    function toggleAccordion(activityId) {
+      const card = document.getElementById(`accordion_${activityId}`);
+      card.classList.toggle('open');
+    }
+
+    function toggleStageDropdown(activityId, stageId) {
+      const dropdown = document.getElementById(`stage_dropdown_${activityId}_${stageId}`);
+      dropdown.classList.toggle('open');
+    }
+
+    function closeStageDropdown(activityId, stageId) {
+      const dropdown = document.getElementById(`stage_dropdown_${activityId}_${stageId}`);
+      if (dropdown) {
+        dropdown.classList.remove('open');
+      }
+    }
+
+    function saveStage(activityId, stageId) {
+      const fileInput = document.getElementById(`file_${activityId}_${stageId}`);
+      const noteInput = document.getElementById(`note_${activityId}_${stageId}`);
+
+      const file = fileInput.files[0];
+      const note = noteInput.value.trim();
+
+      const allSubmissions = getSubmissions();
+      const key = getUserActivityKey(activityId);
+
+      if (!allSubmissions[key]) {
+        allSubmissions[key] = {};
+      }
+
+      allSubmissions[key][stageId] = {
+        fileName: file ? file.name : (allSubmissions[key][stageId]?.fileName || ''),
+        note: note,
+        uploadedAt: new Date().toLocaleString(),
+        completed: true
+      };
+
+      saveSubmissions(allSubmissions);
+
+      closeStageDropdown(activityId, stageId);
+      renderActivities();
+
+      const activityCard = document.getElementById(`accordion_${activityId}`);
+      if (activityCard) {
+        activityCard.classList.add('open');
+      }
+    }
+
+    function renderActivities() {
+      const container = document.getElementById('activityContainer');
+      const activities = getActivities();
+      const allSubmissions = getSubmissions();
+
+      if (!activities.length) {
+        container.innerHTML = '<div class="empty">No activities available yet.</div>';
+        return;
+      }
+
+      container.innerHTML = activities.map((activity, index) => {
+        const key = getUserActivityKey(activity.id);
+        const userUploads = allSubmissions[key] || {};
+        const completed = activity.stages.filter(stage => userUploads[stage.id]?.completed).length;
+        const progress = Math.round((completed / activity.stages.length) * 100);
+        const deadlineStatus = getDeadlineStatus(activity.deadline);
+
+        return `
+          <div class="activity-accordion ${index === 0 ? 'open' : ''}" id="accordion_${activity.id}">
+            <button class="accordion-header" type="button" onclick="toggleAccordion('${activity.id}')">
+              <div class="accordion-left">
+                <h2>${activity.title}</h2>
+                <p>${activity.description}</p>
+                <div class="meta">Progress: ${completed}/${activity.stages.length} completed</div>
+                <div class="meta">Deadline: ${activity.deadline || 'No deadline'}</div>
+                <div class="meta" style="color:${deadlineStatus.color}; font-weight:700;">
+                  ${activity.deadline ? deadlineStatus.text : ''}
+                </div>
+              </div>
+              <div class="accordion-right">
+                <span class="progress-pill">${progress}%</span>
+                <span class="accordion-icon">⌄</span>
+              </div>
+            </button>
+
+            <div class="accordion-content">
+              <div class="accordion-inner">
+                <div class="accordion-inner-content">
+                  <div class="progress-bar">
+                    <div class="progress-fill" style="width:${progress}%"></div>
+                  </div>
+
+                  ${activity.stages.map(stage => {
+                    const submission = userUploads[stage.id];
+                    const isCompleted = !!submission?.completed;
+
+                    return `
+                      <div class="stage-card ${isCompleted ? 'completed' : ''}">
+                        <div class="stage-top">
+                          <h4>${stage.title}</h4>
+                          <span class="badge ${isCompleted ? 'completed' : 'pending'}">
+                            ${isCompleted ? 'Completed' : 'Pending'}
+                          </span>
+                        </div>
+
+                        <div class="instruction">${stage.instruction}</div>
+
+                        <div class="stage-dropdown ${isCompleted ? '' : 'open'}" id="stage_dropdown_${activity.id}_${stage.id}">
+                          <button
+                            class="stage-dropdown-toggle"
+                            type="button"
+                            onclick="toggleStageDropdown('${activity.id}', '${stage.id}')"
+                          >
+                            <span>${isCompleted ? 'View submitted stage' : 'Open stage form'}</span>
+                            <span class="stage-dropdown-icon">⌄</span>
+                          </button>
+
+                          <div class="stage-dropdown-content">
+                            <div class="stage-dropdown-inner">
+                              <label class="field-label">Upload File</label>
+                              <input type="file" id="file_${activity.id}_${stage.id}" />
+
+                              <label class="field-label">Remarks / Description</label>
+                              <textarea id="note_${activity.id}_${stage.id}" placeholder="Write your remarks here...">${submission ? submission.note : ''}</textarea>
+
+                              <div class="stage-actions">
+                                <button class="btn small" onclick="saveStage('${activity.id}', '${stage.id}')">
+                                  ${isCompleted ? 'Update Stage' : 'Save Stage'}
+                                </button>
+                              </div>
+
+                              <div class="status">
+                                ${submission
+                                  ? `Completed • File: ${submission.fileName || 'No file selected'} • Saved: ${submission.uploadedAt}`
+                                  : 'Not submitted yet'}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function logout() {
+      localStorage.removeItem(SESSION_KEY);
+      window.location.replace('index.html');
+    }
+
+    renderActivities();
+  </script>
+</body>
+</html>
